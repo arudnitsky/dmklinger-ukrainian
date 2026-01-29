@@ -777,6 +777,7 @@ let wordDict = new Object(); // Maps first letter to Set of term IDs for typeahe
 let searchTerm; // Normalized search query string
 let literalPhrases; // Array of exact phrases from "quoted" terms
 let fuzzyWords; // Array of fuzzy search words (partial matching)
+let exactMatchOnly = false; // If true, only show exact matches to search term
 
 /**
  * COPY EVENT HANDLER
@@ -988,6 +989,7 @@ window.addEventListener("keydown", (event) => {
  * @param {string} options.filter - Part-of-speech filter (e.g., 'noun', 'verb', optional)
  * @param {string} options.sort - Sort order: 'freq', 'alpha', or 'alpha_rev' (default: 'freq')
  * @param {number} options.limit - Maximum number of results to return (optional)
+ * @param {boolean} options.exactMatchOnly - If true, only return exact matches to search term (default: false)
  *
  * @returns {Object} Result object containing:
  *   - data: Array of matching word objects
@@ -1027,6 +1029,7 @@ function lookupWords(options = {}) {
     filter = null,
     sort = "freq",
     limit = null,
+    exactMatchOnly = false,
   } = options;
 
   // Start with appropriate sorted dataset
@@ -1285,6 +1288,15 @@ function lookupWords(options = {}) {
     }
   }
 
+  // Apply exact match filter if enabled
+  if (exactMatchOnly && searchQuery) {
+    const normalizedQuery = searchQuery.toLowerCase().replace(/\u0301/g, "");
+    resultData = resultData.filter((word) => {
+      const normalizedWord = word.word.toLowerCase().replace(/\u0301/g, "");
+      return normalizedWord === normalizedQuery;
+    });
+  }
+
   // Apply limit if specified
   const totalMatches = resultData.length;
   if (limit !== null && limit > 0) {
@@ -1373,6 +1385,7 @@ function searchHelper() {
       searchQuery: searchTerm,
       filter: curFilter,
       sort: sortInfo,
+      exactMatchOnly: exactMatchOnly,
     });
 
     data = result.data;
@@ -1400,6 +1413,7 @@ function select() {
     searchQuery: searchTerm,
     filter: curFilter,
     sort: sortInfo,
+    exactMatchOnly: exactMatchOnly,
   });
 
   data = result.data;
@@ -1430,6 +1444,7 @@ function filter() {
     searchQuery: searchTerm,
     filter: curFilter,
     sort: sortInfo,
+    exactMatchOnly: exactMatchOnly,
   });
 
   data = result.data;
@@ -1467,6 +1482,9 @@ function filter() {
  * 4. Update URL if requested
  */
 function search(changeURL = true) {
+  // Read exact match checkbox state
+  exactMatchOnly = document.querySelector("#exactMatch").checked;
+
   const letters =
     "abcdefghijklmnopqrstuvwxyzабвгдежзийклмнопрстуфхцчшщъыьэюяєіїґ '\"";
   searchTerm = document.querySelector("input#search").value.toLowerCase();
@@ -1491,6 +1509,7 @@ function search(changeURL = true) {
     searchQuery: searchTerm,
     filter: curFilter,
     sort: sortInfo,
+    exactMatchOnly: exactMatchOnly,
   });
 
   data = result.data;
@@ -1534,6 +1553,13 @@ function setURL(replace = false) {
   if (urlSortTerm) {
     const startChar = addedParam ? "&" : "?";
     base += startChar + "s=" + urlSortTerm;
+    addedParam = true;
+  }
+
+  // Add exact match parameter
+  if (exactMatchOnly) {
+    const startChar = addedParam ? "&" : "?";
+    base += startChar + "e=1";
   }
 
   // Update browser history
@@ -1589,6 +1615,7 @@ function readURL(urlRaw) {
     s: "freq", // Sort by frequency
     f: "", // No filter
     q: "", // No search
+    e: false, // Exact match off by default
   };
 
   // Track which parameters were found in URL
@@ -1596,6 +1623,7 @@ function readURL(urlRaw) {
     s: false,
     f: false,
     q: false,
+    e: false,
   };
 
   // Map parameter keys to UI element selectors
@@ -1603,12 +1631,19 @@ function readURL(urlRaw) {
     s: "select#sort", // Sort dropdown
     f: "select#filter", // Filter dropdown
     q: "input#search", // Search input
+    e: "#exactMatch", // Exact match checkbox
   };
 
   // Apply URL parameters to UI elements
   for (let [var_, val_] of params) {
     if (var_ in funcs) {
-      document.querySelector(funcs[var_]).value = decodeURI(val_); // Decode URL encoding
+      if (var_ === "e") {
+        // Handle checkbox (checked property, not value)
+        document.querySelector(funcs[var_]).checked = val_ === "1";
+      } else {
+        // Handle text inputs and selects
+        document.querySelector(funcs[var_]).value = decodeURI(val_); // Decode URL encoding
+      }
       found[var_] = true;
     }
   }
@@ -1616,7 +1651,13 @@ function readURL(urlRaw) {
   // Apply defaults for missing parameters
   for (const i of Object.keys(found)) {
     if (!found[i]) {
-      document.querySelector(funcs[i]).value = defaults[i];
+      if (i === "e") {
+        // Handle checkbox default
+        document.querySelector(funcs[i]).checked = defaults[i];
+      } else {
+        // Handle text input/select defaults
+        document.querySelector(funcs[i]).value = defaults[i];
+      }
     }
   }
 
