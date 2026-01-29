@@ -1,0 +1,16 @@
+[project]
+name = "ukrainian-dictionary"
+version = "1.0.0"
+description = "A Ukrainian-to-English dictionary web app with inflection tables"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+]
+
+[project.scripts]
+serve = "uvicorn:main"
+
+[tool.uv]
+dev-dependencies = []
