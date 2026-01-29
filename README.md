@@ -6,7 +6,23 @@ Made because I was a little annoyed by the dearth of resources for Ukrainian lea
 
 **Frontend**: Hosted on GitHub Pages at https://dmklinger.github.io/ukrainian/
 
-## API Reference
+## Changes and additions in this fork (new)
+
+Forked from https://github.com/dmklinger/ukrainian
+
+Changes
+
+- Split apart word lookups from D3 rendering
+- Added exactMatchOnly option to search options
+- Added python fastapi wrapper to serve original site, available at locahost:8000
+- Added Dockerfile and docker-compose.yml
+- Added API endpoint for searching and returning search results
+- Reimplemented JS search functionality in Python
+- Combined documentation with original README
+
+Note - I totally vibe-coded all these changes in Github Copilot. Blame me and not dmklinger if something is broken.
+
+## API Reference (new)
 
 The server provides a REST API for programmatic dictionary lookups.
 
@@ -70,7 +86,7 @@ curl "http://localhost:8000/api/lookup?q=при&sort=alpha&limit=10&exact=false"
 
 - `400 Bad Request`: Invalid `filter` or `sort` value (response includes valid options)
 
-## Shell Script Usage
+## Shell Script Usage (new)
 
 The `lookup.sh` script provides a convenient command-line interface:
 
@@ -103,7 +119,7 @@ The `lookup.sh` script provides a convenient command-line interface:
 | `--host`       | API host (default: http://localhost:8000) |
 | `-h, --help`   | Show help message                         |
 
-## Docker Deployment
+## Docker Deployment (new)
 
 ### Using Docker Compose (recommended)
 
@@ -133,7 +149,7 @@ docker stop $(docker ps -q --filter ancestor=ukrainian-dictionary)
 
 The server will be available at http://localhost:8000
 
-## Development
+## Development (new)
 
 This project uses [uv](https://docs.astral.sh/uv/) for Python package management.
 
@@ -150,7 +166,7 @@ uv sync
 uv run uvicorn server:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Regenerating Dictionary Data
+### Regenerating Dictionary Data (original)
 
 To regenerate the dictionary data from source:
 
@@ -161,16 +177,16 @@ python main.py  # Takes several hours, requires ~4GB RAM
 
 Output files (`words.json`, `index.json`, `word_dict.json`) are generated in `etl/data/` and should be copied to the project root.
 
-## Data Sources
+## Data Sources (original)
 
 - [Wiktionary](https://en.wiktionary.org/) - Word definitions and forms
 - [dbnary](http://kaiko.getalp.org/about-dbnary/) - Additional definitions from Wiktionary dumps
 - [Ukrainian Linguistic Corpus](https://lcorp.ulif.org.ua/dictua/dictua.aspx) - Inflection tables
 
-## License
+## License (original)
 
 Distributed under [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License) - feel free to reuse this data!
 
-## Related Projects
+## Related Projects (original)
 
 If you are also interested in a Russian dictionary, see [this](https://github.com/dmklinger/russian) related project.
