@@ -1,0 +1,14 @@
+# requirements
+bs4
+bz2
+collections
+copy
+extract
+json
+os
+re
+requests
+time
+urllib
+urllib3
+
