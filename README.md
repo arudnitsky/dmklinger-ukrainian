@@ -19,6 +19,7 @@ Changes
 - Added API endpoint for searching and returning search results
 - Reimplemented JS search functionality in Python
 - Combined documentation with original README
+- Added lookup.sh - command-line interface for the Ukrainian Dictionary API
 
 Note - I totally vibe-coded all these changes in Github Copilot. Blame me and not dmklinger if something is broken.
 
@@ -138,13 +139,13 @@ docker-compose down
 
 ```bash
 # Build the image
-docker build -t ukrainian-dictionary .
+docker build -t dmklinger-ukrainian-web:latest .
 
 # Run the container
-docker run -d -p 8000:8000 ukrainian-dictionary
+docker run -d -p 8000:8000 dmklinger-ukrainian-web:latest
 
 # Stop the container
-docker stop $(docker ps -q --filter ancestor=ukrainian-dictionary)
+docker stop $(docker ps -q --filter ancestor=dmklinger-ukrainian-web:latest)
 ```
 
 The server will be available at http://localhost:8000

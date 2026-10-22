@@ -1,30 +1,24 @@
-# Use Python 3.11 slim image
-FROM python:3.11-slim
+FROM python:3.11-slim AS base
 
-# Set working directory
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Install uv
+FROM base AS builder
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY pyproject.toml ./
+RUN uv sync --no-dev
 
-# Copy project files
-COPY pyproject.toml .
-COPY uv.lock* .
+FROM base AS runtime
 
-# Install dependencies using uv
-RUN uv sync --frozen --no-dev || uv sync --no-dev
+COPY --from=builder /app/.venv /app/.venv
+COPY server.py index.html index.js index.css index.json words.json word_dict.json ./
 
-# Copy application files
-COPY server.py .
-COPY index.html .
-COPY index.js .
-COPY index.css .
-COPY index.json .
-COPY words.json .
-COPY word_dict.json .
+ENV PATH="/app/.venv/bin:$PATH"
 
-# Expose port
 EXPOSE 8000
 
-# Run the FastAPI server
-CMD ["uv", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
